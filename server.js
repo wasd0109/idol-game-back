@@ -27,7 +27,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.get('/profile/:id', id.handleGetProfile);
+app.get('/profile/:id', id.handleGetProfile(pg));
 
 app.post('/login', login.handleLogin(pg, bcrypt));
 
