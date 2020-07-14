@@ -33,4 +33,4 @@ app.post('/register', register.handleRegister(pg, bcrypt));
 
 app.post('/action', action.handleAction(pg));
 
-app.listen(3002);
+app.listen(process.env.PORT || 3002);
