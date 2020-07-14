@@ -8,7 +8,9 @@ const id = require('./controllers/id');
 const login = require('./controllers/login');
 const register = require('./controllers/register');
 
-require('dotenv').config();
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
 const pg = knex({
   client: 'pg',
