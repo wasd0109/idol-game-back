@@ -2,6 +2,12 @@ const express = require('express');
 const bcrypt = require('bcrypt-nodejs');
 const cors = require('cors');
 const knex = require('knex');
+
+const action = require('./controllers/action');
+const id = require('./controllers/id');
+const login = require('./controllers/login');
+const register = require('./controllers/register');
+
 require('dotenv').config();
 
 const pg = knex({
@@ -19,62 +25,12 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-const randomizeElementAndLuck = () => {
-  const elements = ['fire', 'water', 'electric', 'grass'];
-  const number = Math.floor(Math.random() * 10);
-  return {
-    luck: number,
-    element: elements[number % 4],
-  };
-};
+app.get('/profile/:id', id.handleGetProfile);
 
-app.get('/profile/:id', (req, res) => {
-  const { id } = req.params;
-  pg.select('id')
-    .from('users')
-    .where('id', id)
-    .then((data) => {
-      pg.select('*')
-        .from('players')
-        .where('userid', data[0].id)
-        .then((data) => res.json(data))
-        .catch(console.log);
-    })
-    .catch(console.log);
-});
+app.post('/login', login.handleLogin(pg, bcrypt));
 
-app.post('/register', (req, res) => {
-  const { username, password, name } = req.body;
-  const hash = bcrypt.hashSync(password);
-  const { element, luck } = randomizeElementAndLuck();
-  pg.transaction((trx) => {
-    trx
-      .insert({ username, hash })
-      .into('users')
-      .returning('id')
-      .then((id) => {
-        const userid = id[0];
-        return trx
-          .insert({ userid, name, element, luck })
-          .into('players')
-          .catch(trx.rollback);
-      })
-      .then(trx.commit)
-      .catch(trx.rollback);
-  })
-    .then(() => {
-      return pg
-        .select('id', 'username')
-        .from('users')
-        .where('username', username)
-        .then((data) => res.json(data))
-        .catch(console.log);
-    })
-    .catch((err) => res.send('Duplicate player name/user name'));
-});
+app.post('/register', register.handleRegister(pg, bcrypt));
 
-app.post('/action');
-
-app.get('/login');
+app.post('/action', action.handleAction(pg));
 
 app.listen(3002);
