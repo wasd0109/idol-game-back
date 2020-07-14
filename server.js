@@ -15,10 +15,10 @@ if (process.env.NODE_ENV !== 'production') {
 const pg = knex({
   client: 'pg',
   connection: {
-    host: '127.0.0.1',
-    user: 'wasd0109',
-    password: process.env.DATABASE_PASSWORD,
-    database: 'idolgame',
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+      rejectUnauthorized: false,
+    },
   },
 });
 
