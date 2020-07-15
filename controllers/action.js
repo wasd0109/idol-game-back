@@ -67,6 +67,7 @@ const updateStats = (stats) => {
 
 const handleAction = (pg) => (req, res) => {
   const { userID } = req.body;
+  if (!userID) return res.status(400).json('Invalid request');
   pg.select('*')
     .from('players')
     .where('userid', '=', userID)

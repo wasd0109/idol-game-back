@@ -1,5 +1,6 @@
 const handleGetProfile = (pg) => (req, res) => {
   const { id } = req.params;
+  if (!id) return res.status(400).json('Invalid request');
   console.log(id);
   pg.select('*')
     .from('players')

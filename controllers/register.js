@@ -9,6 +9,8 @@ const randomizeElementAndLuck = () => {
 
 const handleRegister = (pg, bcrypt) => (req, res) => {
   const { username, password, name } = req.body;
+  if (!username || !password || !name)
+    return res.status(400).json('Invalid request');
   const hash = bcrypt.hashSync(password);
   const { element, luck } = randomizeElementAndLuck();
   pg.transaction((trx) => {
@@ -21,10 +23,13 @@ const handleRegister = (pg, bcrypt) => (req, res) => {
         return trx
           .insert({ userid, name, element, luck })
           .into('players')
-          .catch(trx.rollback);
+          .catch(res.json('Player name already exist'));
       })
       .then(trx.commit)
-      .catch(trx.rollback);
+      .catch(() => {
+        if (!res._headerSent) res.json('User name already exist');
+        trx.rollback;
+      });
   })
     .then(() => {
       return pg
@@ -32,9 +37,9 @@ const handleRegister = (pg, bcrypt) => (req, res) => {
         .from('users')
         .where('username', username)
         .then((data) => res.json(data))
-        .catch(console.log);
+        .catch(res.status(404));
     })
-    .catch((err) => res.send('Duplicate player name/user name'));
+    .catch((err) => console.log(err));
 };
 
 module.exports = { handleRegister };
