@@ -23,7 +23,7 @@ const handleRegister = (pg, bcrypt) => (req, res) => {
         return trx
           .insert({ userid, name, element, luck })
           .into('players')
-          .catch(res.json('Player name already exist'));
+          .catch((error) => res.json("Player name already exist"));
       })
       .then(trx.commit)
       .catch(() => {

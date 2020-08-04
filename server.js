@@ -15,23 +15,23 @@ if (process.env.NODE_ENV !== 'production') {
 const pg =
   process.env.NODE_ENV === 'production'
     ? knex({
-        client: 'pg',
-        connection: {
-          connectionString: process.env.DATABASE_URL,
-          ssl: {
-            rejectUnauthorized: false,
-          },
+      client: 'pg',
+      connection: {
+        connectionString: process.env.DATABASE_URL,
+        ssl: {
+          rejectUnauthorized: false,
         },
-      })
+      },
+    })
     : knex({
-        client: 'pg',
-        connection: {
-          host: '127.0.0.1',
-          user: 'wasd0109',
-          password: process.env.DATABASE_PASSWORD,
-          database: 'idolgame',
-        },
-      });
+      client: 'pg',
+      connection: {
+        host: '127.0.0.1',
+        user: 'wasd0109',
+        password: process.env.DATABASE_PASSWORD,
+        database: 'idolgame',
+      },
+    });
 
 const app = express();
 
@@ -46,4 +46,4 @@ app.post('/register', register.handleRegister(pg, bcrypt));
 
 app.post('/action', action.handleAction(pg));
 
-app.listen(process.env.PORT || 3002);
+app.listen(process.env.PORT || 3001);
