@@ -7,6 +7,7 @@ const action = require('./controllers/action');
 const id = require('./controllers/id');
 const login = require('./controllers/login');
 const register = require('./controllers/register');
+const players = require('./controllers/players');
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
@@ -15,23 +16,23 @@ if (process.env.NODE_ENV !== 'production') {
 const pg =
   process.env.NODE_ENV === 'production'
     ? knex({
-      client: 'pg',
-      connection: {
-        connectionString: process.env.DATABASE_URL,
-        ssl: {
-          rejectUnauthorized: false,
+        client: 'pg',
+        connection: {
+          connectionString: process.env.DATABASE_URL,
+          ssl: {
+            rejectUnauthorized: false,
+          },
         },
-      },
-    })
+      })
     : knex({
-      client: 'pg',
-      connection: {
-        host: '127.0.0.1',
-        user: 'wasd0109',
-        password: process.env.DATABASE_PASSWORD,
-        database: 'idolgame',
-      },
-    });
+        client: 'pg',
+        connection: {
+          host: '127.0.0.1',
+          user: 'wasd0109',
+          password: process.env.DATABASE_PASSWORD,
+          database: 'idolgame',
+        },
+      });
 
 const app = express();
 
@@ -39,6 +40,8 @@ app.use(express.json());
 app.use(cors());
 
 app.get('/profile/:id', id.handleGetProfile(pg));
+
+app.get('/players', players.handleGetPlayers(pg));
 
 app.post('/login', login.handleLogin(pg, bcrypt));
 
