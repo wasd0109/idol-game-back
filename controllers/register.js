@@ -1,3 +1,4 @@
+const User = require('../models/users');
 const randomizeElementAndLuck = () => {
   const elements = ['fire', 'water', 'electric', 'grass'];
   const number = Math.floor(Math.random() * 10);
@@ -7,39 +8,34 @@ const randomizeElementAndLuck = () => {
   };
 };
 
-const handleRegister = (pg, bcrypt) => (req, res) => {
-  const { username, password, name } = req.body;
-  if (!username || !password || !name)
+const handleRegister = (bcrypt) => async (req, res) => {
+  const { username, password, playerName } = req.body;
+  if (!username || !password || !playerName)
     return res.status(400).json('Invalid request');
   const hash = bcrypt.hashSync(password);
   const { element, luck } = randomizeElementAndLuck();
-  pg.transaction((trx) => {
-    trx
-      .insert({ username, hash })
-      .into('users')
-      .returning('id')
-      .then((id) => {
-        const userid = id[0];
-        return trx
-          .insert({ userid, name, element, luck })
-          .into('players')
-          .catch((error) => res.json("Player name already exist"));
-      })
-      .then(trx.commit)
-      .catch(() => {
-        if (!res._headerSent) res.json('User name already exist');
-        trx.rollback;
-      });
-  })
-    .then(() => {
-      return pg
-        .select('id', 'username')
-        .from('users')
-        .where('username', username)
-        .then((data) => res.json(data))
-        .catch(res.status(404));
-    })
-    .catch((err) => console.log(err));
+
+  const usernameExist = await User.exists({ username });
+  const playerNameExist = await User.exists({ playerName });
+
+  if (usernameExist && playerNameExist)
+    return res.json('Username and player name already exist');
+  else if (playerNameExist) return res, json('Player Name already exist');
+  else if (usernameExist) res.json('Username already exist');
+  else {
+    const user = new User({
+      username,
+      playerName,
+      password: hash,
+      element,
+      luck,
+    });
+    try {
+      const result = user.save(res.json(result));
+    } catch (err) {
+      res.json(err);
+    }
+  }
 };
 
 module.exports = { handleRegister };
